@@ -9,7 +9,7 @@
 
 bool isClose(const double a, const double b)
 {
-    if (abs(a-b) > 0.005) return false;
+    if (fabs(a-b) > 0.005) return false;
     return true;
 }
 
@@ -21,8 +21,6 @@ GazeboInteface::GazeboInteface(): node_handle_("") {
     joint_5_pub = node_handle_.advertise < std_msgs::Float64 > ("/joint_5_cntrl/command", 10);
     joint_6_pub = node_handle_.advertise < std_msgs::Float64 > ("/joint_6_cntrl/command", 10);
     joint_7_pub = node_handle_.advertise < std_msgs::Float64 > ("/joint_7_cntrl/command", 10);
-    head_pan_pub = node_handle_.advertise < std_msgs::Float64 > ("/pan/command", 10);
-    head_tilt_pub = node_handle_.advertise < std_msgs::Float64 > ("/tilt/command", 10);
 
     node_handle_.getParam("torque_control", torque_control_);
 
@@ -54,8 +52,6 @@ GazeboInteface::GazeboInteface(): node_handle_("") {
     pub_arr[4] = joint_5_pub;
     pub_arr[5] = joint_6_pub;
     pub_arr[6] = joint_7_pub;
-    pub_arr[7] = head_pan_pub;
-    pub_arr[8] = head_tilt_pub;
 
     smooth_joint_trajectory_server_->start();
 
@@ -75,8 +71,8 @@ GazeboInteface::GazeboInteface(): node_handle_("") {
     ros::Duration(5).sleep();
     if (torque_control_)
     {
-        // command 2 positon for joints 5,6,7, pan and tilt
-        for (int index = 4; index < 9; index++) {
+        // command 2 positon for joints 5,6, and 7
+        for (int index = 4; index < 7; index++) {
             std_msgs::Float64 msg;
             msg.data = 0;
             pub_arr[index].publish(msg);
@@ -95,7 +91,7 @@ GazeboInteface::GazeboInteface(): node_handle_("") {
     }
     else
     {
-        for (int index = 0; index < 9; index++) {
+        for (int index = 0; index < 7; index++) {
             std_msgs::Float64 msg;
             msg.data = 0;
             pub_arr[index].publish(msg);
@@ -175,9 +171,9 @@ void GazeboInteface::goalJointPositionCallback(const sensor_msgs::JointState::Co
 
 void GazeboInteface::recordArmJoints(const sensor_msgs::JointState::ConstPtr & msg) {
     int msgSize = msg->position.size();
-    if (msgSize == 9) {
+    if (msgSize == 7) {
         for (int index = 0; index < 7; ++index)
-            arm_state[index] = msg->position.at(index + 2); //the index of arm joints starts at 2
+            arm_state[index] = msg->position.at(index);
     } else if (msgSize == 2) {
         // wheel joint states
     } else {
@@ -207,31 +203,42 @@ void GazeboInteface::gripperOpen(const std_msgs::Empty & mg) {
     joint_6_pub.publish(msg);
     msg.data = GRIPPER_OPEN_POS;
     joint_7_pub.publish(msg);
-
-    ros::Duration(1).sleep();
+    ros::Duration(2).sleep();
+    ros::spinOnce();
     
     if (!isClose(arm_state[5], -1*GRIPPER_OPEN_POS) || 
         !isClose(arm_state[6], GRIPPER_OPEN_POS))
         gripper_state = -1;  // unknown
     else
         gripper_state = 0; // open
+    
+    std_msgs::Int8 gripper_state_msg;
+    gripper_state_msg.data = gripper_state;
+    gripper_state_pub.publish(gripper_state_msg);
 }
 
 void GazeboInteface::gripperClose(const std_msgs::Empty & mg) {
     gripper_state = 1; // closing
+    
+    std_msgs::Int8 gripper_state_msg;
+    gripper_state_msg.data = gripper_state;
+    gripper_state_pub.publish(gripper_state_msg);
 
     std_msgs::Float64 msg;
     msg.data = GRIPPER_CLOSE_POS;
     joint_6_pub.publish(msg);
     joint_7_pub.publish(msg);
-
-    ros::Duration(1).sleep();
+    ros::Duration(2).sleep();
+    ros::spinOnce();
 
     if (!isClose(arm_state[5], GRIPPER_CLOSE_POS) || 
         !isClose(arm_state[6], GRIPPER_CLOSE_POS))
         gripper_state = 2;    //object in hand
     else
         gripper_state = 3; //Fully closed
+    
+    gripper_state_msg.data = gripper_state;
+    gripper_state_pub.publish(gripper_state_msg);
 }
 
 void GazeboInteface::executeJointTrajectory(const control_msgs::FollowJointTrajectoryGoalConstPtr & goal) {

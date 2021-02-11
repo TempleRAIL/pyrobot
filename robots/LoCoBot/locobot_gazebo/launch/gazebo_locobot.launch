@@ -2,9 +2,11 @@
   <arg name="base"/>
 
   <!-- Static transform to make camera work in sim -->
-  <node pkg="tf" type="static_transform_publisher" name="cam_transform" args="0 0 0 0 0 0 /camera_link /camera_color_optical_frame 100" />
+  <node pkg="tf" type="static_transform_publisher" name="cam_transform" args="0 0 0 -1.5708 0 -1.5708 /camera_link /camera_color_optical_frame 100" />
 
-  <include file="$(find locobot_gazebo)/launch/empty_world.launch">  
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rascal_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rascal_gazebo)/models"/>
+  <include file="$(find rascal_launch)/launch/sherd_world.launch">  
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
@@ -15,22 +17,11 @@
 
   <rosparam file="$(find locobot_gazebo)/config/robotic_arm_gazebo_joint_states.yaml" command="load"/>
 
-  <group if="$(eval base =='create')">
-    <param name="robot_description" textfile="$(find locobot_description)/urdf/locobot_lite_description.urdf"/>
-
-    <include file="$(find locobot_lite_moveit_config)/launch/planning_context.launch">
-      <arg name="load_robot_description" value="true"/>
-    </include>
-
-    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
-          args="-file $(find locobot_description)/urdf/locobot_lite_description.urdf -urdf -z 0.05 -model locobot" />
-  </group>
-
   <group if="$(eval base =='kobuki')">
     <param name="robot_description" textfile="$(find locobot_description)/urdf/locobot_description.urdf"/>
 
     <include file="$(find locobot_moveit_config)/launch/planning_context.launch">
-      <arg name="load_robot_description" value="true"/>
+      <arg name="load_robot_description" value="false"/>
     </include>
 
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"

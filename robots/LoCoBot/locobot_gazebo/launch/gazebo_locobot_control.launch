@@ -12,8 +12,6 @@
                           joint_5_cntrl
                           joint_6_cntrl
                           joint_7_cntrl
-                          pan
-                          tilt
                           joint_state_controller"/>
 
 </launch>

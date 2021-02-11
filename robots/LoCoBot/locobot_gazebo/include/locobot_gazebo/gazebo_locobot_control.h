@@ -43,9 +43,7 @@ private:
 	ros::Publisher joint_5_pub;
 	ros::Publisher joint_6_pub;
 	ros::Publisher joint_7_pub;
-	ros::Publisher head_pan_pub;
-	ros::Publisher head_tilt_pub;
-	ros::Publisher pub_arr[9];
+	ros::Publisher pub_arr[7];
 	ros::Publisher gripper_state_pub;
 
 	ros::Subscriber joint_command_sub_;

@@ -1,10 +1,10 @@
 <launch>
-    <arg name="use_camera" default="false"/>
-    <arg name="use_arm" default="false"/>
+    <arg name="use_camera" default="true"/>
+    <arg name="use_arm" default="true"/>
     <arg name="use_vslam" default="false"/>
     <arg name="use_base" default="false"/>
     <arg name="torque_control" default="false"/>
-    <arg name="use_sim" default="false"/>
+    <arg name="use_sim" default="true"/>
     <arg name="teleop" default="false"/>
     <arg name="use_rviz" default="true"/>
     <arg name="base" default="kobuki"/> <!-- Options: create and kobuki -->
@@ -78,11 +78,11 @@
 
     <!-- Common -->
 
-    <node name="turtlebot_controller_node" pkg="turtlebot_controller" 
-                            type="turtlebot_controller_node"/>
+    <!-- <node name="turtlebot_controller_node" pkg="turtlebot_controller" 
+                            type="turtlebot_controller_node"/> -->
 
-    <node name="gpmp_action_server" pkg="locobot_control" 
-                            type="pointrobot3factor_ros_server.py"/>
+    <!-- <node name="gpmp_action_server" pkg="locobot_control" 
+                            type="pointrobot3factor_ros_server.py"/> -->
 
 
     <node name="pyrobot_kinematics" pkg="pyrobot_bridge"
@@ -90,10 +90,11 @@
 
     
     <group if="$(eval arg('use_base') or arg('use_sim'))" >
-        <include file="$(find base_navigation)/launch/move_base.launch">
+        <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
+        <!-- <include file="$(find base_navigation)/launch/move_base.launch">
             <arg name="use_map" value="$(arg use_vslam)"/>
             <arg name="base" value="$(arg base)"/>
-        </include>
+        </include> -->
     </group>
 
 

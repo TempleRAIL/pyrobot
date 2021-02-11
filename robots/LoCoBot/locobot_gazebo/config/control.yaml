@@ -32,14 +32,6 @@ joint_7_cntrl:
   type: effort_controllers/JointPositionController
   joint: joint_7
   pid: {p: 15.0, i: 1.0, d: 0.2}
-pan:
-  type: effort_controllers/JointPositionController
-  joint: head_pan_joint
-  pid: {p: 30.0, i: 1.0, d: 0.1}
-tilt:
-  type: effort_controllers/JointPositionController 
-  joint: head_tilt_joint
-  pid: {p: 30.0, i: 1.0, d: 0.1}
 
 # arm_cntrl:
 #   type: "position_controllers/JointTrajectoryController"
